@@ -3,5 +3,5 @@
   <component name="Black">
     <option name="sdkName" value="DenseNetPruning" />
   </component>
-  <component name="ProjectRootManager" version="2" project-jdk-name="pytorch" project-jdk-type="Python SDK" />
+  <component name="ProjectRootManager" version="2" project-jdk-name="ganas" project-jdk-type="Python SDK" />
 </project>

@@ -3,7 +3,7 @@ import utils
 import numpy as np
 import copy
 
-
+#check pt
 class GA:
     def __init__(self, heatmap_values, possible_length, output_df, SRU, args):
         self.heatmap_values = heatmap_values
