@@ -3,7 +3,6 @@ import utils
 import numpy as np
 import copy
 
-
 class GA:
     def __init__(self, heatmap_values, possible_length, output_df, SRU, args):
         self.heatmap_values = heatmap_values
@@ -75,26 +74,51 @@ class GA:
         # print("fitness")
         # print(f"individual = {individual}")
         # print(f"individual[0] = {individual[0]}")
-        # path = self.convert_path(individual)
-        # print(f"path = {path}")
 
         detect_point = 0
-        heatmap_values_copy = copy.deepcopy(self.heatmap_values)
-        # print("fitness")
-        # print(f"self.possible_length - 1 = {self.possible_length - 1}")
-        # print(f"heatmap_values_copy= {heatmap_values_copy}")
+        # pandas DataFrame을 안전하게 복사 (deepcopy 아님)
+        heatmap_values_copy = self.heatmap_values.copy(deep=True)
+
+        actual_coverage = self.SRU['speed'] * self.SRU['coverage'] * self.SRU['time']
+        coverage = 1 - np.exp(-(total_coverage / actual_coverage))
+
         for i in range(self.possible_length - 1):
-            # print(f"heatmap_values_copy.iloc[individual[i]] = {heatmap_values_copy.iloc[individual[i]]}")
-            actual_coverage = self.SRU['speed'] * self.SRU['coverage'] * i * self.SRU['time']
-            coverage = 1 - np.exp(-(total_coverage / actual_coverage))
+            # print(f"heatmap_values_copy = {heatmap_values_copy}")
             # print(f"individual[i] = {individual[i]}")
-            # print(f"heatmap_values_copy = {heatmap_values_copy}")
-            # print(f"heatmap_values_copy.iloc[individual[i]] = {heatmap_values_copy.iloc[individual[i]]}")
-            # print(f"heatmap_values_copy = {heatmap_values_copy}")
-            detect_point += heatmap_values_copy.iloc[individual[i]]
-            heatmap_values_copy.iloc[individual[i]] = int(heatmap_values_copy.iloc[individual[i]] * (1 - coverage))
+            r, c = individual[i]  # 각 위치가 (row, col) 튜플로 들어 있다고 가정
+            val = heatmap_values_copy.iat[r, c]
+            # print(f"heatmap_values_copy.iat[r, c] = {val}")
+            detect_point += val
+            heatmap_values_copy.iat[r, c] = int(val * (1 - coverage))
 
         return detect_point
+
+    # def fitness(self, individual, total_coverage):
+    #     print("fitness")
+    #     print(f"individual = {individual}")
+    #     print(f"individual[0] = {individual[0]}")
+    #     # path = self.convert_path(individual)
+    #     # print(f"path = {path}")
+    #
+    #     detect_point = 0
+    #     heatmap_values_copy = self.heatmap_values.copy(deep=True)
+    #     # print("fitness")
+    #     # print(f"self.possible_length - 1 = {self.possible_length - 1}")
+    #     # print(f"heatmap_values_copy= {heatmap_values_copy}")
+    #     for i in range(self.possible_length - 1):
+    #         print(f"heatmap_values_copy = {heatmap_values_copy}")
+    #         print(f"individual[i] = {individual[i]}")
+    #         print(f"heatmap_values_copy.iloc[individual[i]] = {heatmap_values_copy.iloc[individual[i]]}")
+    #         actual_coverage = self.SRU['speed'] * self.SRU['coverage'] * self.SRU['time']
+    #         coverage = 1 - np.exp(-(total_coverage / actual_coverage))
+    #         # print(f"individual[i] = {individual[i]}")
+    #         # print(f"heatmap_values_copy = {heatmap_values_copy}")
+    #         # print(f"heatmap_values_copy.iloc[individual[i]] = {heatmap_values_copy.iloc[individual[i]]}")
+    #         # print(f"heatmap_values_copy = {heatmap_values_copy}")
+    #         detect_point += heatmap_values_copy.iloc[individual[i]]
+    #         heatmap_values_copy.iloc[individual[i]] = int(heatmap_values_copy.iloc[individual[i]] * (1 - coverage))
+    #
+    #     return detect_point
 
     def reconstruct_path(self, start, diffs):
         path = [start]
@@ -143,8 +167,8 @@ class GA:
         return offspring1, offspring2
 
     def mutation(self, individual1, individual2):
-        offspring1 = []
-        offspring2 = []
+        # offspring1 = []
+        # offspring2 = []
         # print("individual1:", individual1)
         # print("individual2:", individual2)
         pt = random.randint(0, len(individual1) - 1)
@@ -192,59 +216,79 @@ class GA:
     def move_to_local_optimum(self, path, start_idx, rows, cols, max_iterations=5):
         # print(f"original path = {path}")
         # print(f"start_idx = {start_idx}")
+        # print(f"pre path = {path[:start_idx]}")
 
-        for idx in range(start_idx, len(path)):
-            iterations = 0
-            while iterations < max_iterations:
-                current_x, current_y = path[idx]
-                best_x, best_y = current_x, current_y
-                best_value = self.heatmap_values.iloc[current_x, current_y]
+        total_coverage = len(self.heatmap_values) * len(self.heatmap_values)
+        actual_coverage = self.SRU['speed'] * self.SRU['coverage'] * self.SRU['time']
+        coverage = 1 - np.exp(-(total_coverage / actual_coverage))
 
-                if self.look == '3':
-                    for i in range(current_x - 1, current_x + 2):
-                        for j in range(current_y - 1, current_y + 2):
-                            if 0 <= i < rows and 0 <= j < cols:
-                                value = self.heatmap_values.iloc[i, j]
+        heatmap = self.heatmap_values.copy(deep=True)
+
+        visited = path[:start_idx]#set(path[:start_idx])
+        # print(f"init visited = {visited}")
+        # print(f"bbb heatmap = {heatmap}")
+        for p in range(start_idx):
+            # print(p)
+            heatmap.iloc[path[p]] = int(heatmap.iloc[path[p]] * (1 - coverage))
+        # print(f"aaa heatmap = {heatmap}")
+
+        for idx in range(start_idx, len(path)-1):
+            # print(f"222 visited = {visited}")
+            current_x, current_y = path[idx-1]
+            # print(f"222 idx = {idx}")
+            # print(f"current_x = {current_x}, current_y = {current_y}")
+            best_x, best_y = current_x, current_y
+            best_value = heatmap.iloc[current_x, current_y]
+
+            if self.look == '3':
+                for i in range(current_x - 1, current_x + 2):
+                    for j in range(current_y - 1, current_y + 2):
+                        if 0 <= i < rows and 0 <= j < cols:
+                            if (i, j) not in visited:
+                                value = heatmap.iloc[i, j]
                                 if value > best_value:
                                     best_value = value
                                     best_x, best_y = i, j
-                elif self.look == '5':
-                    for dx in [-1, 0, 1]:
-                        # print(f"current_x = {current_x}, current_y = {current_y}")
-                        for dy in [-1, 0, 1]:
-                            i1 = current_x + dx
-                            j1 = current_y + dy
-                            i2 = current_x + 2 * dx
-                            j2 = current_y + 2 * dy
-                            # print(f"i1 = {i1}, j1 = {j1}, i2 = {i2}, j2 = {j2}")
-                            val1 = 0
-                            val2 = 0
 
-                            if 0 <= i1 < rows and 0 <= j1 < cols:
+            elif self.look == '5':
+                for dx in [-1, 0, 1]:
+                    # print(f"current_x = {current_x}, current_y = {current_y}")
+                    for dy in [-1, 0, 1]:
+                        i1 = current_x + dx
+                        j1 = current_y + dy
+                        i2 = current_x + 2 * dx
+                        j2 = current_y + 2 * dy
+                        # print(f"i1 = {i1}, j1 = {j1}, i2 = {i2}, j2 = {j2}")
+                        val1 = 0
+                        val2 = 0
+
+                        if 0 <= i1 < rows and 0 <= j1 < cols:
+                            if (i1, j1) not in visited:
                                 val1 = self.heatmap_values.iloc[i1, j1]
                                 if val1 == 0:
                                     val1 += 1
-                                # print(f"val1 = {val1}")
-                            if 0 <= i2 < rows and 0 <= j2 < cols:
+                            # print(f"val1 = {val1}")
+                        if 0 <= i2 < rows and 0 <= j2 < cols:
+                            if (i2, j2) not in visited:
                                 val2 = self.heatmap_values.iloc[i2, j2]
                                 if val2 == 0:
                                     val2 += 1
-                                # print(f"val2 = {val2}")
+                            # print(f"val2 = {val2}")
 
-                            score = 0.8 * val1 + 0.2 * val2
+                        score = 0.8 * val1 + 0.2 * val2
 
-                            if score > best_value:
-                                best_value = score
-                                best_x, best_y = i1, j1
-                    # for i in range(current_x - 1, current_x + 4):
-                    #     for j in range(current_y - 1, current_y + 4):
-                    #         if 0 <= i < rows and 0 <= j < cols:
-                    #             value = self.heatmap_values.iloc[i, j]
-                    #             if value > best_value:
-                    #                 best_value = value
-                    #                 best_x, best_y = i, j
-                path[idx] = (best_x, best_y)
-                iterations += 1
+                        if score > best_value:
+                            best_value = score
+                            best_x, best_y = i1, j1
+            # print(f"bbb222 heatmap = {heatmap}")
+            heatmap.iloc[(best_x, best_y)] = int(heatmap.iloc[(best_x, best_y)] * (1 - coverage))
+            # print(f"idx = {idx}")
+            # print(f"next coordinate = {(best_x, best_y)}")
+            # print(f"next best_value = {best_value}")
+            # print(f"aaa222 heatmap = {heatmap}")
+            path[idx] = (best_x, best_y)
+            visited.append((best_x, best_y))
+            # print(f"aaa222 visited = {visited}")
 
         return path
 
@@ -259,13 +303,23 @@ class GA:
         return offspring1, offspring2
 
     def local2(self, offspring1, offspring2):
-        print(f"self.heatmap_values = {self.heatmap_values}")
-        print(f"offspring1 = {offspring1}")
-        print(f"offspring1[0] = {offspring1[0]}")
+        total_coverage = len(self.heatmap_values) * len(self.heatmap_values)
+        # print("local 222")
+        # print(f"self.heatmap_values = {self.heatmap_values}")
+        # print(f"offspring1 = {offspring1}")
+        # print(f"offspring1[0] = {offspring1[0]}")
         num = []
+        map = copy.deepcopy(self.heatmap_values)
         for i in range(len(offspring1)):
             aaa = self.heatmap_values.iloc[offspring1[i]]
             num.append(aaa)
+            actual_coverage = self.SRU['speed'] * self.SRU['coverage'] * self.SRU['time']
+            coverage = 1 - np.exp(-(total_coverage / actual_coverage))
+            # print(f"individual[i] = {individual[i]}")
+            # print(f"heatmap_values_copy = {heatmap_values_copy}")
+            # print(f"heatmap_values_copy.iloc[individual[i]] = {heatmap_values_copy.iloc[individual[i]]}")
+            # print(f"heatmap_values_copy = {heatmap_values_copy}")
+            map.iloc[offspring1[i]] = int(map.iloc[offspring1[i]] * (1 - coverage))
         print(f"num = {num}, min = {min(num)}, max = {max(num)}")
         return offspring1, offspring2
 
@@ -387,6 +441,7 @@ class GA:
         print(fitness_values)
         fitness_best = []
         fitness_avg = []
+        FVR = 10
         for g in range(self.generations):
             utils.print_and_log(logger, f"Generation {g + 1}")
             selected_number = list(range(self.pop_size))
@@ -404,18 +459,28 @@ class GA:
                 offspring1, offspring2 = self.repair(offspring1, offspring2)
                 # print(f"after offspring1 = {offspring1}")
                 if self.local_search == "ma":
-                    offspring1, offspring2 = self.local(offspring1, offspring2)
+                    # print(f"FVR ={FVR}")
+                    if FVR > 0.9:
+                        # print("local search")
+                        offspring1, offspring2 = self.local(offspring1, offspring2)
+                    else:
+                        # print("local search X")
+                        pass
                 elif self.local_search == "ma2":
                     offspring1, offspring2 = self.local2(offspring1, offspring2)
 
                 # print(offspring2)
                 population.append(offspring1)
                 population.append(offspring2)
-                # for p in population:
-                #     print(p)
+
                 fitness_values.append(self.fitness(offspring1, total_coverage))
                 fitness_values.append(self.fitness(offspring2, total_coverage))
 
+            old_avg = sum(fitness_values[:self.pop_size]) / len(fitness_values[:self.pop_size])
+            new_avg = sum(fitness_values[self.pop_size:]) / len(fitness_values[self.pop_size:])
+            FVR = new_avg/old_avg
+            print(f"old_avg: {old_avg}, new_avg: {new_avg}")
+            print(f"new/old = {new_avg/old_avg}")
             fitness_rank = np.argsort(fitness_values)[::-1]
             fitness_values = [fitness_values[i] for i in fitness_rank]
             fitness_values = fitness_values[:self.pop_size]
@@ -440,6 +505,7 @@ class GA:
         utils.print_and_log(logger, "Best fitness {}".format(fitness_values[0]))
         # for p in population:
         #     print(p)
+        print("best_individual = ", best_individual)
         print("all fitness = ", fitness_values)
         print("final_path = ", final_path)
         return final_path, fitness_values[0]

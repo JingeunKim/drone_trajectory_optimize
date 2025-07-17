@@ -22,6 +22,7 @@ def print_and_log(logger, msg):
     logger.info(msg)
 
 def draw(final_path, args):
+    print("draw phase")
     heatmap = pd.read_csv("./dataset/heatmap_values.csv", header=None)
     df = pd.read_csv("./dataset/heatmap_center_point.csv", header=None)
     print(heatmap)

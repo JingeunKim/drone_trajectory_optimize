@@ -7,15 +7,15 @@ import ga
 import hybrid
 
 arg_parser = argparse.ArgumentParser()
-arg_parser.add_argument("--mode", type=str, default="ga", help="greedy, ga, ma, ma2, hybrid")
+arg_parser.add_argument("--mode", type=str, default="ma", help="greedy, ga, ma, ma2, hybrid")
 arg_parser.add_argument("--seed", type=int, default="3", help="seed value for random number default = 2026")
 arg_parser.add_argument("--run", type=int, default="1", help="number of runs")
 arg_parser.add_argument("--look", type=str, default="3", help="look 3x3 or 5x5")
 
 #GA
-arg_parser.add_argument("--pop_size", type=int, default="1000", help="population size")
-arg_parser.add_argument("--generation", type=int, default="250", help="number of generations")
-arg_parser.add_argument("--position", type=str, default="rightdown", help="leftup, leftdown, rightup, rightdown, center")
+arg_parser.add_argument("--pop_size", type=int, default="100", help="population size")
+arg_parser.add_argument("--generation", type=int, default="300", help="number of generations")
+arg_parser.add_argument("--position", type=str, default="center", help="leftup, leftdown, rightup, rightdown, center")
 arg_parser.add_argument("--mutation_rate", type=float, default="0.2", help="mutation_rate")
 
 def log_run_info(logger, args, run):
