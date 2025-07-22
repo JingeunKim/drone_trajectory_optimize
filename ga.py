@@ -93,33 +93,6 @@ class GA:
 
         return detect_point
 
-    # def fitness(self, individual, total_coverage):
-    #     print("fitness")
-    #     print(f"individual = {individual}")
-    #     print(f"individual[0] = {individual[0]}")
-    #     # path = self.convert_path(individual)
-    #     # print(f"path = {path}")
-    #
-    #     detect_point = 0
-    #     heatmap_values_copy = self.heatmap_values.copy(deep=True)
-    #     # print("fitness")
-    #     # print(f"self.possible_length - 1 = {self.possible_length - 1}")
-    #     # print(f"heatmap_values_copy= {heatmap_values_copy}")
-    #     for i in range(self.possible_length - 1):
-    #         print(f"heatmap_values_copy = {heatmap_values_copy}")
-    #         print(f"individual[i] = {individual[i]}")
-    #         print(f"heatmap_values_copy.iloc[individual[i]] = {heatmap_values_copy.iloc[individual[i]]}")
-    #         actual_coverage = self.SRU['speed'] * self.SRU['coverage'] * self.SRU['time']
-    #         coverage = 1 - np.exp(-(total_coverage / actual_coverage))
-    #         # print(f"individual[i] = {individual[i]}")
-    #         # print(f"heatmap_values_copy = {heatmap_values_copy}")
-    #         # print(f"heatmap_values_copy.iloc[individual[i]] = {heatmap_values_copy.iloc[individual[i]]}")
-    #         # print(f"heatmap_values_copy = {heatmap_values_copy}")
-    #         detect_point += heatmap_values_copy.iloc[individual[i]]
-    #         heatmap_values_copy.iloc[individual[i]] = int(heatmap_values_copy.iloc[individual[i]] * (1 - coverage))
-    #
-    #     return detect_point
-
     def reconstruct_path(self, start, diffs):
         path = [start]
         current = start
@@ -232,7 +205,7 @@ class GA:
             heatmap.iloc[path[p]] = int(heatmap.iloc[path[p]] * (1 - coverage))
         # print(f"aaa heatmap = {heatmap}")
 
-        for idx in range(start_idx, len(path)-1):
+        for idx in range(start_idx, len(path)):
             # print(f"222 visited = {visited}")
             current_x, current_y = path[idx-1]
             # print(f"222 idx = {idx}")
@@ -264,13 +237,13 @@ class GA:
 
                         if 0 <= i1 < rows and 0 <= j1 < cols:
                             if (i1, j1) not in visited:
-                                val1 = self.heatmap_values.iloc[i1, j1]
+                                val1 = heatmap.iloc[i1, j1]
                                 if val1 == 0:
                                     val1 += 1
                             # print(f"val1 = {val1}")
                         if 0 <= i2 < rows and 0 <= j2 < cols:
                             if (i2, j2) not in visited:
-                                val2 = self.heatmap_values.iloc[i2, j2]
+                                val2 = heatmap.iloc[i2, j2]
                                 if val2 == 0:
                                     val2 += 1
                             # print(f"val2 = {val2}")
@@ -479,8 +452,8 @@ class GA:
             old_avg = sum(fitness_values[:self.pop_size]) / len(fitness_values[:self.pop_size])
             new_avg = sum(fitness_values[self.pop_size:]) / len(fitness_values[self.pop_size:])
             FVR = new_avg/old_avg
-            print(f"old_avg: {old_avg}, new_avg: {new_avg}")
-            print(f"new/old = {new_avg/old_avg}")
+            # print(f"old_avg: {old_avg}, new_avg: {new_avg}")
+            # print(f"new/old = {new_avg/old_avg}")
             fitness_rank = np.argsort(fitness_values)[::-1]
             fitness_values = [fitness_values[i] for i in fitness_rank]
             fitness_values = fitness_values[:self.pop_size]
@@ -497,6 +470,11 @@ class GA:
             # for p in population:
             #     print(p)
         final_path = []
+
+        # print("ㄷㅠㅇ")
+        # for q in population:
+        #     print(q)
+        #     print(len(q))
         best_individual = population[0]
         # best_individual = self.convert_path(best_individual)
         for i in range(len(best_individual)):

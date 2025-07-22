@@ -4,10 +4,10 @@ import argparse
 import prepare_data
 import utils
 import ga
-import hybrid
+import rl
 
 arg_parser = argparse.ArgumentParser()
-arg_parser.add_argument("--mode", type=str, default="ma", help="greedy, ga, ma, ma2, hybrid")
+arg_parser.add_argument("--mode", type=str, default="ma", help="greedy, ga, ma, ma2, rl")
 arg_parser.add_argument("--seed", type=int, default="3", help="seed value for random number default = 2026")
 arg_parser.add_argument("--run", type=int, default="1", help="number of runs")
 arg_parser.add_argument("--look", type=str, default="3", help="look 3x3 or 5x5")
@@ -15,7 +15,7 @@ arg_parser.add_argument("--look", type=str, default="3", help="look 3x3 or 5x5")
 #GA
 arg_parser.add_argument("--pop_size", type=int, default="100", help="population size")
 arg_parser.add_argument("--generation", type=int, default="300", help="number of generations")
-arg_parser.add_argument("--position", type=str, default="center", help="leftup, leftdown, rightup, rightdown, center")
+arg_parser.add_argument("--position", type=str, default="leftdown", help="leftup, leftdown, rightup, rightdown, center")
 arg_parser.add_argument("--mutation_rate", type=float, default="0.2", help="mutation_rate")
 
 def log_run_info(logger, args, run):
@@ -56,10 +56,10 @@ if __name__ == "__main__":
             final_path, num_detect = Genetic.evolve(logger, arg.seed+run)
             utils.draw(final_path, arg)
             results.append(num_detect)
-        elif arg.mode == 'hybrid': #15:greedy 20:GA 20:Greedy 20:GA
+        elif arg.mode == 'rl': #15:greedy 20:GA 20:Greedy 20:GA
             utils.print_and_log(logger, f"Run {run+1}")
-            hybrid_method = hybrid.hybrid(heatmap_values, possible_length, output_df, SRU, arg)
-            final_path, num_detect = hybrid_method.find_path(logger, arg.seed+run)
+            rl = rl.rl(heatmap_values, possible_length, output_df, SRU, arg)
+            final_path, num_detect = rl.find_path(logger, arg.seed+run)
             # Genetic = ga.GA(heatmap_values, possible_length, output_df, SRU, arg)
             # final_path, num_detect = Genetic.evolve(logger, arg.seed+run)
             utils.draw(final_path, arg)
