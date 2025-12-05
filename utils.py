@@ -8,7 +8,10 @@ import os
 
 def setup_logger(arg):
     logger = logging.getLogger()
-    log_path = './logs/{:%Y%m%d}_{}_{}_{}.log'.format(datetime.datetime.now(), arg.mode, arg.position, arg.look)
+    if arg.mode == "rl":
+        log_path = './logs/{:%Y%m%d}_{}_{}_{}_{}.log'.format(datetime.datetime.now(), arg.mode, arg.RLmode, arg.position, arg.look)
+    else:
+        log_path = './logs/{:%Y%m%d}_{}_{}_{}.log'.format(datetime.datetime.now(), arg.mode, arg.position, arg.look)
     logger.setLevel(logging.INFO)
     formatter = logging.Formatter(fmt='%(asctime)s: %(message)s', datefmt='%H:%M:%S')
     fh = logging.FileHandler(log_path)
@@ -104,8 +107,11 @@ def draw(final_path, args):
     plt.legend()
     # plt.grid(True)
     plt.tight_layout()
+    if args.mode == "rl":
+        save_folder = './Figure/'+ args.mode + "_" + args.RLmode + "_" + args.position
+    else:
+        save_folder = './Figure/'+ args.mode + "_" + args.position
 
-    save_folder = './Figure/'+ args.mode + "_" + args.position
     if not os.path.exists(save_folder):
         os.makedirs(save_folder)
     save_path = os.path.join(save_folder, 'result_run_' + str(args.run) + "_" + str(args.look) + '.png')

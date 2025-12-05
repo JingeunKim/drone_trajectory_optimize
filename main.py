@@ -5,17 +5,19 @@ import prepare_data
 import utils
 import ga
 import rl
+import time
 
 arg_parser = argparse.ArgumentParser()
-arg_parser.add_argument("--mode", type=str, default="ma", help="greedy, ga, ma, ma2, rl")
+arg_parser.add_argument("--mode", type=str, default="rl", help="greedy, ga, ma, ma2, rl")
 arg_parser.add_argument("--seed", type=int, default="3", help="seed value for random number default = 2026")
 arg_parser.add_argument("--run", type=int, default="1", help="number of runs")
 arg_parser.add_argument("--look", type=str, default="3", help="look 3x3 or 5x5")
+arg_parser.add_argument("--RLmode", type=str, default="ac_dea", help="q or ac or drl_ac or ac_ea")
 
 #GA
 arg_parser.add_argument("--pop_size", type=int, default="100", help="population size")
 arg_parser.add_argument("--generation", type=int, default="300", help="number of generations")
-arg_parser.add_argument("--position", type=str, default="leftdown", help="leftup, leftdown, rightup, rightdown, center")
+arg_parser.add_argument("--position", type=str, default="leftup", help="leftup, leftdown, rightup, rightdown, center")
 arg_parser.add_argument("--mutation_rate", type=float, default="0.2", help="mutation_rate")
 
 def log_run_info(logger, args, run):
@@ -28,6 +30,7 @@ def log_run_info(logger, args, run):
     utils.print_and_log(logger, f"{'Mutation rate:':15}{args.mutation_rate}")
     utils.print_and_log(logger, f"{'Position:':15}{args.position}")
     utils.print_and_log(logger, f"{'look:':15}{args.look}")
+    utils.print_and_log(logger, f"{'RL mode:':15}{args.RLmode}")
     utils.print_and_log(logger, "="*50)
 
 if __name__ == "__main__":
@@ -38,9 +41,11 @@ if __name__ == "__main__":
     for run in range(arg.run):
         SRU, heatmap_values, output_df, possible_length, coverage, prob = prepare_data.prepare_data()
         if arg.mode == 'greedy':
+            start = time.time()
             utils.print_and_log(logger, f"Run {run+1}")
             greedy_ = greedy.Greedy(heatmap_values, possible_length, output_df, SRU, arg.position, arg.look)
             final_path, num_detect = greedy_.greedy(logger, arg.seed+run)
+            print(f"CPU time = {time.time() - start}")
             print(final_path)
             utils.draw(final_path, arg)
             results.append(num_detect)
@@ -60,12 +65,18 @@ if __name__ == "__main__":
             utils.print_and_log(logger, f"Run {run+1}")
             rl = rl.rl(heatmap_values, possible_length, output_df, SRU, arg)
             final_path, num_detect = rl.find_path(logger, arg.seed+run)
+            utils.draw(final_path, arg)
+            results.append(num_detect)
+        elif arg.mode == 'drl': #15:greedy 20:GA 20:Greedy 20:GA
+            utils.print_and_log(logger, f"Run {run+1}")
+            rl = rl.rl(heatmap_values, possible_length, output_df, SRU, arg)
+            final_path, num_detect = rl.find_path(logger, arg.seed+run)
             # Genetic = ga.GA(heatmap_values, possible_length, output_df, SRU, arg)
             # final_path, num_detect = Genetic.evolve(logger, arg.seed+run)
             utils.draw(final_path, arg)
             results.append(num_detect)
-        elif arg.mode == 'rl':
-            pass
-        elif arg.mode == 'nco':
-            pass
+        # elif arg.mode == 'rl':
+        #     pass
+        # elif arg.mode == 'nco':
+        #     pass
     utils.print_and_log(logger, f"average result = {sum(results) / len(results)}")
