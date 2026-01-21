@@ -7,8 +7,7 @@ OFFICIAL IMPLEMENTATION of the paper: **"MAC: Memetic Actor-Critic Framework for
 ##  Abstract
 Unmanned Aerial Vehicles (UAVs) play a pivotal role in maritime Search and Rescue (SAR) missions, yet generating optimal flight paths remains a significant challenge. Traditional meta-heuristic algorithms, such as genetic algorithms (GA), often suffer from premature convergence to local optima, while reinforcement learning (RL) approaches typically struggle with low sample efficiency and slow initial convergence. To address these limitations, this paper proposes a hybrid framework termed Memetic Actor-Critic (MAC). The MAC framework integrates the decision-making policy of Actor-Critic with the global search capabilities of a memetic algorithm. Specifically, we introduce a task-specific local refinement mechanism that utilizes state-value estimations to refine the actor's policy, enabling precise exploitation of high-value regions beyond immediate rewards. The proposed method was thoroughly evaluated using a realistic SAR scenario constructed from oceanographic particle simulation data collected from the East Sea of South Korea. Experimental results demonstrate that MAC significantly outperforms standalone GA, MA, AC, and other variants in terms of both solution quality and convergence stability, proving its effectiveness in balancing global exploration and local exploitation.
 
-
-##  Experimental Results (5 Instances)
+###  Experimental Results (5 Instances)
 
 Here are the trajectory visualization results for all 5 instances. MAC consistently navigates to high-density regions effectively.
 
