@@ -496,10 +496,10 @@ class GA:
 
         return offspring1, offspring2
 
-    def evolve(self, logger, seed):
+    def evolve(self, logger, seed, run):
         total_coverage = len(self.heatmap_values) * len(self.heatmap_values)
 
-        random.seed(seed)
+        random.seed(seed+run)
         genetic_path = []
 
         population = self.initialization()

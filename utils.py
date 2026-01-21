@@ -9,7 +9,10 @@ import os
 def setup_logger(arg):
     logger = logging.getLogger()
     if arg.mode == "rl":
-        log_path = './logs/{:%Y%m%d}_{}_{}_{}_{}.log'.format(datetime.datetime.now(), arg.mode, arg.RLmode, arg.position, arg.look)
+        if arg.RLmode == 'ac_ma':
+            log_path = './logs/{:%Y%m%d}_{}_{}_{}_{}_{}_{}_{}_{}_{}_{}.log'.format(datetime.datetime.now(), arg.mode, arg.RLmode, arg.inherit, arg.crossover_mode, arg.position, arg.look, arg.strength, arg.pop_size, arg.generation, arg.mutation_rate)
+        else:
+            log_path = './logs/{:%Y%m%d}_{}_{}_{}_{}_{}_{}.log'.format(datetime.datetime.now(), arg.mode, arg.RLmode, arg.inherit, arg.crossover_mode, arg.position, arg.look)
     else:
         log_path = './logs/{:%Y%m%d}_{}_{}_{}.log'.format(datetime.datetime.now(), arg.mode, arg.position, arg.look)
     logger.setLevel(logging.INFO)
@@ -24,7 +27,7 @@ def print_and_log(logger, msg):
     print(msg)
     logger.info(msg)
 
-def draw(final_path, args):
+def draw(final_path, args, run):
     print("draw phase")
     heatmap = pd.read_csv("./dataset/heatmap_values.csv", header=None)
     df = pd.read_csv("./dataset/heatmap_center_point.csv", header=None)
@@ -107,14 +110,16 @@ def draw(final_path, args):
     plt.legend()
     # plt.grid(True)
     plt.tight_layout()
-    if args.mode == "rl":
-        save_folder = './Figure/'+ args.mode + "_" + args.RLmode + "_" + args.position
+    if args.mode == "rl": #arg.inherit, arg.crossover_mode,
+        save_folder = './Figure/'+ args.mode + "_" + args.RLmode + "_" + args.position + "_" + args.inherit + "_" + args.crossover_mode + '_' + str(args.pop_size) + '_' + str(args.generation)
+    elif args.mode == 'ma':
+        save_folder = './Figure/'+ args.mode + "_" + args.position + '_' + str(args.pop_size) + '_' + str(args.generation)
     else:
         save_folder = './Figure/'+ args.mode + "_" + args.position
 
     if not os.path.exists(save_folder):
         os.makedirs(save_folder)
-    save_path = os.path.join(save_folder, 'result_run_' + str(args.run) + "_" + str(args.look) + '.png')
+    save_path = os.path.join(save_folder, 'result_run_' + str(args.run) + "_" + str(args.look) + "_" + str(run) + '.png')
     plt.savefig(save_path)
     # plt.show()
 
