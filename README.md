@@ -14,27 +14,27 @@ Here are the trajectory visualization results for all 5 instances. MAC consisten
 <table>
   <tr>
     <td align="center" width="50%">
-      <img src="assets/final_visualization_outside_i1.png" width="100%">
+      <img src="drone_simulation_i1.gif" width="100%">
       <br><b>Instance 1</b>
     </td>
     <td align="center" width="50%">
-      <img src="assets/final_visualization_outside_i2.png" width="100%">
+      <img src="drone_simulation_i2.gif" width="100%">
       <br><b>Instance 2</b>
     </td>
   </tr>
   <tr>
     <td align="center" width="50%">
-      <img src="assets/final_visualization_outside_i3.png" width="100%">
+      <img src="drone_simulation_i3.gif" width="100%">
       <br><b>Instance 3</b>
     </td>
     <td align="center" width="50%">
-      <img src="assets/final_visualization_outside_i4.png" width="100%">
+      <img src="drone_simulation_i4.gif" width="100%">
       <br><b>Instance 4</b>
     </td>
   </tr>
   <tr>
     <td colspan="2" align="center">
-      <img src="assets/final_visualization_outside_i5.png" width="50%">
+      <img src="drone_simulation_i5.gif" width="50%">
       <br><b>Instance 5</b>
     </td>
   </tr>
